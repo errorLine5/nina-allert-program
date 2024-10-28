@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
@@ -42,27 +43,21 @@ void onStart(ServiceInstance service) {
     client.onSubscribeFail = (topic) {
       print('Errore nella sottoscrizione al topic $topic');
     };
-    client.pongCallback = () {
-      print('Ping ricevuto dal broker MQTT');
-    };
 
-    client.connect();
+    client.connect().then((value) {
+      client.subscribe('test', MqttQos.atLeastOnce);
+
+      client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+        final recMess = c[0].payload as MqttPublishMessage;
+        final payload =
+            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+
+        print('Received message: ${payload} from topic: ${c[0].topic}');
+      });
+    });
+
+    //every second get updates
   }
-
-  Timer.periodic(const Duration(seconds: 15), (timer) async {
-    if (service is AndroidServiceInstance) {
-      service.setForegroundNotificationInfo(
-        title: "My App Service",
-        content: "Running background service",
-      );
-    }
-
-    service
-        .invoke('update', {"current_time": DateTime.now().toIso8601String()});
-
-    //every 15 seconds print the current time
-    print(DateTime.now().toIso8601String());
-  });
 }
 
 @pragma('vm:entry-point')
