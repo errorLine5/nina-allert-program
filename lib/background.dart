@@ -35,7 +35,7 @@ void onStart(ServiceInstance service) {
     client.port = 1883; // Default MQTT port
     client.keepAlivePeriod = 20; // TTL
     client.logging(on: true); // ??
-    client.setProtocolV311(); // 
+    client.setProtocolV311(); //
 
     client.onConnected = onConnected;
     client.onDisconnected = onDisconnected;
@@ -49,11 +49,14 @@ void onStart(ServiceInstance service) {
 
       client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> message) {
         final recMess = message[0].payload as MqttPublishMessage;
-        final payload = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        final payload =
+            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         print('Received message: ${payload} from topic: ${message[0].topic}');
 
         // Riproduci il suono quando ricevi un messaggio
         audioPlayer.play(AssetSource('alert_sound.mp3'));
+        print("sound");
+        print(AssetSource('alert_sound.mp3').toString());
       });
     });
   }
@@ -73,7 +76,8 @@ bool onBackgroundIos(ServiceInstance service) {
 }
 
 void onConnected() {
-  print('EXAMPLE::OnConnected client callback - Client connection was successful');
+  print(
+      'EXAMPLE::OnConnected client callback - Client connection was successful');
 }
 
 void onSubscribed(String topic) {
