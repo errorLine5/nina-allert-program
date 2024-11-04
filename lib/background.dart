@@ -33,9 +33,9 @@ void onStart(ServiceInstance service) {
 
     // Configura il client
     client.port = 1883; // Default MQTT port
-    client.keepAlivePeriod = 20;
-    client.logging(on: true);
-    client.setProtocolV311();
+    client.keepAlivePeriod = 20; // TTL
+    client.logging(on: true); // ??
+    client.setProtocolV311(); // 
 
     client.onConnected = onConnected;
     client.onDisconnected = onDisconnected;
@@ -46,17 +46,17 @@ void onStart(ServiceInstance service) {
 
     client.connect().then((value) {
       client.subscribe('test', MqttQos.atLeastOnce);
+      // MqttQos contiene le tipologie di QoS. atLeastOnce si assicura che
+      // il messaggio arrivi almeno una volta.
 
-      client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
-        final recMess = c[0].payload as MqttPublishMessage;
+      client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> message) {
+        final recMess = message[0].payload as MqttPublishMessage;
         final payload =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-
-        print('Received message: ${payload} from topic: ${c[0].topic}');
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+          // Converte il messaggio ricevuto in una stringa
+        print('Received message: ${payload} from topic: ${message[0].topic}');
       });
     });
-
-    //every second get updates
   }
 }
 
@@ -85,3 +85,6 @@ void onSubscribed(String topic) {
 void onDisconnected() {
   print('EXAMPLE::OnDisconnected client callback - Client disconnected');
 }
+
+
+// Per riferimento, il JSON che pubblica N.I.N.A:
