@@ -59,6 +59,7 @@ void onStart(ServiceInstance service) {
         print(AssetSource('alert_sound.mp3').toString());
       });
     });
+
   }
 }
 
