@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -30,6 +29,7 @@ void onStart(ServiceInstance service) {
     });
 
     final client = MqttServerClient('test.mosquitto.org', '');
+    final AudioPlayer audioPlayer = AudioPlayer(); // Instanza AudioPlayer qui
 
     // Configura il client
     client.port = 1883; // Default MQTT port
@@ -46,15 +46,14 @@ void onStart(ServiceInstance service) {
 
     client.connect().then((value) {
       client.subscribe('test', MqttQos.atLeastOnce);
-      // MqttQos contiene le tipologie di QoS. atLeastOnce si assicura che
-      // il messaggio arrivi almeno una volta.
 
       client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> message) {
         final recMess = message[0].payload as MqttPublishMessage;
-        final payload =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-          // Converte il messaggio ricevuto in una stringa
+        final payload = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         print('Received message: ${payload} from topic: ${message[0].topic}');
+
+        // Riproduci il suono quando ricevi un messaggio
+        audioPlayer.play(AssetSource('alert_sound.mp3'));
       });
     });
   }
@@ -74,8 +73,7 @@ bool onBackgroundIos(ServiceInstance service) {
 }
 
 void onConnected() {
-  print(
-      'EXAMPLE::OnConnected client callback - Client connection was successful');
+  print('EXAMPLE::OnConnected client callback - Client connection was successful');
 }
 
 void onSubscribed(String topic) {
@@ -86,5 +84,4 @@ void onDisconnected() {
   print('EXAMPLE::OnDisconnected client callback - Client disconnected');
 }
 
-
-// Per riferimento, il JSON che pubblica N.I.N.A:
+// La funzione playNotification non è necessaria qui
