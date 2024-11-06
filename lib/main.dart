@@ -1,6 +1,14 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'background.dart';
+
+late FlutterBackgroundService service;
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  service = await initializeService();
   runApp(const MyApp());
 }
 
@@ -28,16 +36,13 @@ class Error {
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   final List<MyItem> items = [
-    MyItem("IP address", "192.168.1.30"),
-    MyItem("Topic", "notifiche varie"),
-    MyItem("Tags", "lista di tag"),
+    MyItem("IP address", "test.mosquitto.org"),
+    MyItem("Port", "1883"),
+    MyItem("Topic", "test"),
+    MyItem("Tags", ""),
   ];
 
-  final List<Error> errors = [
-    Error(Icons.camera, "camera", "is not working"),
-    Error(Icons.radar, "focuser", "is broken"),
-    Error(Icons.mouse, "mount", "is broken"),
-  ];
+  final List<Error> errors = [];
 
   ScrollController scrollView = ScrollController();
   late TabController tabView;
@@ -45,6 +50,22 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     tabView = TabController(length: 2, vsync: this);
+
+    // Listen for errors from background service
+    service.on('updateErrors').listen((event) {
+      if (event == null) return;
+
+      final errorData = event as Map<String, dynamic>;
+      setState(() {
+        print(errorData);
+        errors.add(Error(
+            // You can customize the icon
+            Icons.error_outline,
+            errorData['object'] ?? 'unknown',
+            errorData['content'] ?? 'unknown error'));
+      });
+    });
+
     super.initState();
   }
 
@@ -52,6 +73,24 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        floatingActionButton: tabView.index == 1
+            ? FloatingActionButton(
+                onPressed: () async {
+                  // Save configuration to SharedPreferences
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('ip_address', items[0].content);
+                  await prefs.setString('topic', items[1].content);
+                  await prefs.setString('tags', items[2].content);
+
+                  // Restart service
+                  service.invoke('stopService');
+                  await Future.delayed(const Duration(seconds: 1));
+                  service = await initializeService();
+                },
+                backgroundColor: Colors.green,
+                child: const Icon(Icons.save),
+              )
+            : null,
         body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
@@ -161,9 +200,6 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
-                  TextEditingController contentController =
-                      TextEditingController(text: item.content);
-
                   return Card(
                     margin: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16.0),
@@ -187,7 +223,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                           ),
                           const SizedBox(height: 8.0),
                           TextField(
-                            controller: contentController,
+                            decoration: InputDecoration(
+                              hintText: item.content,
+                            ),
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 15.0,
