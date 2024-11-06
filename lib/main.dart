@@ -30,8 +30,10 @@ class Error {
   final IconData icona;
   final String object;
   final String content;
+  final DateTime timestamp;
+  final Color color;
 
-  Error(this.icona, this.object, this.content);
+  Error(this.icona, this.object, this.content, this.timestamp, this.color);
 }
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
@@ -62,7 +64,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
             // You can customize the icon
             Icons.error_outline,
             errorData['object'] ?? 'unknown',
-            errorData['content'] ?? 'unknown error'));
+            errorData['content'] ?? 'unknown error',
+            DateTime.now(),
+            errorData['object'] == null ? Colors.red : Colors.green));
       });
     });
 
@@ -163,7 +167,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         vertical: 8.0, horizontal: 16.0),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.red[900],
+                        color: item.color,
                         borderRadius: BorderRadius.circular(18.0),
                       ),
                       padding: const EdgeInsets.all(16.0),
@@ -172,13 +176,11 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         children: [
                           Icon(
                             item.icona,
-                            color: Colors.grey,
                           ),
                           Text(
                             item.object,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.white70,
                               fontSize: 18.0,
                               fontFamily: 'Verdana',
                             ),
@@ -186,7 +188,6 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                           const SizedBox(height: 8.0),
                           Text(item.content,
                               style: const TextStyle(
-                                color: Colors.grey,
                                 fontSize: 15.0,
                                 fontFamily: 'Verdana',
                               )),
