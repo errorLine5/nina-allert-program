@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the onStart function from the background library, for the Dart programming language.">
+  <title>onStart function - background library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">flutter_application_1</a></li>
+    <li><a href="../background/background-library.html">background.dart</a></li>
+    <li class="self-crumb">onStart function</li>
+  </ol>
+  <div class="self-name">onStart</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="background&#47;background-library-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-function">onStart</span> function 
+ 
+</h1></div>
+
+    <section class="multi-line-signature">
+        
+
+<span class="returntype">void</span>
+<span class="name ">onStart</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="onStart-param-service"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_background_service_platform_interface/5.1.2/flutter_background_service_platform_interface/ServiceInstance-class.html">ServiceInstance</a></span> <span class="parameter-name">service</span></span></li>
+</ol>)
+
+        
+
+    </section>
+    
+<section class="desc markdown">
+  <p>onStart si occupa di gestire la logica del servizio in background
+dell'applicazione (creazione di un client, sottoscrizione ad un topic e
+gestione dei messagi ricevuti).</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@pragma(&#39;vm:entry-point&#39;)     &#47;&#47; entry-point della JVM
+
+&#47;&#47;&#47; onStart si occupa di gestire la logica del servizio in background
+&#47;&#47;&#47; dell&#39;applicazione (creazione di un client, sottoscrizione ad un topic e
+&#47;&#47;&#47; gestione dei messagi ricevuti).
+void onStart(ServiceInstance service) {
+  &#47;&#47; Controlla che il servizio ricevuto sia istanza di un servizio
+  &#47;&#47; Android.
+  if (service is AndroidServiceInstance) {
+    service.on(&#39;stopService&#39;).listen((event) {
+      service.stopSelf();     &#47;&#47; Arresta il servizio se necessario
+    });
+
+    &#47;&#47; creazione di un clien MQTT
+    final client = MqttServerClient(&#39;test.mosquitto.org&#39;, &#39;&#39;);
+
+    &#47;&#47; Configurazione del client
+    client.port = 1883;
+    client.keepAlivePeriod = 20;
+    client.logging(on: true);
+    client.setProtocolV311();
+    client.onConnected = onConnected;
+    client.onDisconnected = onDisconnected;
+    client.onSubscribed = onSubscribed;
+    client.onSubscribeFail = (topic) { print(&#39;Err. $topic&#39;); };
+
+    client.connect().then((value) {
+      client.subscribe(&#39;test&#39;, MqttQos.atLeastOnce);
+      &#47;&#47; MqttQos.atLeastOnce si assicura che il messaggio arrivi
+      &#47;&#47; almeno una volta.
+
+      &#47;&#47; Ascolta i messaggi in arrivo sul topic
+      client.updates!.listen((List&lt;MqttReceivedMessage&lt;MqttMessage&gt;&gt; message) {
+        &#47;&#47; Casting del messaggio ricevuto di tipo MqttMessage in una delle
+        &#47;&#47; categorie di messaggi (in questo caso MqttPublishMessage).
+        final recMess = message[0].payload as MqttPublishMessage;
+
+        &#47;&#47; Converte il messaggio ricevuto in una stringa.
+        final payload =
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        print(&#39;Received message: ${payload} from topic: ${message[0].topic}&#39;);
+      });
+    });
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">flutter_application_1</a></li>
+    <li><a href="../background/background-library.html">background</a></li>
+    <li class="self-crumb">onStart function</li>
+</ol>
+
+
+    <h5>background library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutter_application_1
+      1.0.0+1
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
