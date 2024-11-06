@@ -1,16 +1,17 @@
-# flutter_application_1
+# Nina Alert Program N.A.P
 
-A new Flutter project.
+N.A.P è un applicazione Android che consente agli utenti di ricevere notifiche inerenti ad errori riscontrati durante l'esecuzione di un'automatizzazione Nina.
 
-## Getting Started
+L'applicazione è un semplice client MQTT in grado di interpretare i messaggi pubblicati dal servizio Ground Station offerto come plug-in Nina.
 
-This project is a starting point for a Flutter application.
+Lo scopo principale dell'applicazione è quello di avvertire l'utente della presenza di un errore nell'esecuzione di un'automatizzazione; l'applicazione consente inoltre all'utente di visualizzare nella schermata principale dell'applicazione i dettagli degli errori ricevuti.
 
-A few resources to get you started if this is your first Flutter project:
+------
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/1c/Speech-language-en.svg" width="30px" height="30px" style="display: inline" />
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+N.A.P is an Android application that allows users to receive notifications regarding errors encountered during the execution of a Nina automation.
+
+The application is a simple MQTT client capable of interpreting messages published by the Ground Station service offered as a Nina plugin.
+
+The main purpose of the application is to warn the user of the presence of an error in the execution of an automation; the application also allows the user to view the details of the errors received on the main application screen.
