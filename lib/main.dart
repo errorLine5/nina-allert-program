@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_application_1/background.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await initializeService();
   runApp(const MyApp());
 }
 
@@ -16,7 +13,7 @@ class MyApp extends StatefulWidget {
 
 class MyItem {
   final String title;
-  final String content;
+  String content; // Rendi il campo content modificabile
 
   MyItem(this.title, this.content);
 }
@@ -31,7 +28,7 @@ class Error {
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   final List<MyItem> items = [
-    MyItem("IP address", "192.1681.1.30"),
+    MyItem("IP address", "192.168.1.30"),
     MyItem("Topic", "notifiche varie"),
     MyItem("Tags", "lista di tag"),
   ];
@@ -63,28 +60,22 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 floating: false,
                 pinned: true,
                 title: Container(
-                  margin: const EdgeInsets.only(
-                      bottom: 1.0), // Imposta il margin-bottom.
+                  margin: const EdgeInsets.only(bottom: 1.0),
                   padding: const EdgeInsets.all(8.0),
                   constraints: const BoxConstraints(
-                    minHeight: 40.0, // Altezza minima del Container.
+                    minHeight: 40.0,
                   ),
                   child: const Text(
                     'n.a.p. \nnina alert application',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 flexibleSpace: LayoutBuilder(
                   builder: (context, constraints) {
-                    // Controlla se l'altezza è inferiore a 30 e imposta il minimo.
                     double height = constraints.maxHeight;
                     return FlexibleSpaceBar(
                       background: Container(
-                        height: height <= 30
-                            ? 30
-                            : height, // Imposta altezza minima di 30.
+                        height: height <= 30 ? 30 : height,
                         child: Image.network(
                           'https://static.vecteezy.com/ti/foto-gratuito/t2/37916193-ai-generato-latteo-modo-galassia-come-visto-a-partire-dal-terra-denso-cluster-di-stelle-e-celeste-polvere-la-creazione-di-un-incandescente-intricato-modello-contro-il-buio-cielo-concetto-di-astronomia-spazio-galassia-foto.jpeg',
                           fit: BoxFit.cover,
@@ -170,6 +161,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
+                  TextEditingController contentController =
+                      TextEditingController(text: item.content);
+
                   return Card(
                     margin: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16.0),
@@ -192,12 +186,19 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                             ),
                           ),
                           const SizedBox(height: 8.0),
-                          Text(item.content,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 15.0,
-                                fontFamily: 'Verdana',
-                              )),
+                          TextField(
+                            controller: contentController,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 15.0,
+                              fontFamily: 'Verdana',
+                            ),
+                            onChanged: (newContent) {
+                              setState(() {
+                                item.content = newContent;
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ),
