@@ -10,6 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 String ipAddress = '';
 String topic = '';
 String port = '1883';
+String csvtags = '';
+
+bool shouldPlaySound = false;
 
 Future<FlutterBackgroundService> initializeService() async {
   print('initializeService');
@@ -33,11 +36,13 @@ Future<FlutterBackgroundService> initializeService() async {
     ipAddress = prefs.getString('ipAddress') ?? '';
     topic = prefs.getString('topic') ?? '';
     port = prefs.getString('port') ?? '';
+    csvtags = prefs.getString('csvtags') ?? '';
 
-    if (ipAddress == '' || topic == '' || port == '') {
+    if (ipAddress == '' || topic == '' || port == '' || csvtags == '') {
       ipAddress = 'test.mosquitto.org';
       topic = 'test';
       port = '1883';
+      csvtags = 'camera,mount,focuser';
     }
   });
   await service.startService();
@@ -52,21 +57,27 @@ void onStart(ServiceInstance service) async {
       service.stopSelf();
     });
 
+    service.on('silence').listen((event) {
+      print('silence');
+      shouldPlaySound = false;
+    });
+
     await SharedPreferences.getInstance().then((prefs) {
       ipAddress = prefs.getString('ipAddress') ?? 'test.mosquitto.org';
       topic = prefs.getString('topic') ?? 'test';
       port = prefs.getString('port') ?? '1883';
+      csvtags = prefs.getString('csvtags') ?? 'camera,mount,focuser';
     });
 
     print('ipAddress: $ipAddress');
     print('topic: $topic');
     print('port: $port');
-
+    print('csvtags: $csvtags');
     final client = MqttServerClient(ipAddress, '');
     final AudioPlayer audioPlayer = AudioPlayer(); // Instanza AudioPlayer qui
 
     // Configura il client
-    client.port = 1883; // Default MQTT port
+    client.port = int.parse(port); // Default MQTT port
     client.keepAlivePeriod = 20; // TTL
     client.logging(on: true); // ??
     client.setProtocolV311(); //
@@ -82,49 +93,70 @@ void onStart(ServiceInstance service) async {
     client.connect().then((value) {
       print('subscribe to $topic');
       client.subscribe(topic, MqttQos.atLeastOnce);
-      SharedPreferences.getInstance().then((prefs) {
-        client.updates!
-            .listen((List<MqttReceivedMessage<MqttMessage>> message) {
-          final recMess = message[0].payload as MqttPublishMessage;
-          final payload =
-              MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
-          // Riproduci il suono quando ricevi un messaggio
-          audioPlayer.play(AssetSource('alert_sound.mp3'));
-          print("sound");
-          print(AssetSource('alert_sound.mp3').toString());
+      // Create a periodic timer for sound
+      Timer.periodic(const Duration(seconds: 3), (timer) {
+        if (shouldPlaySound) {
+          audioPlayer.play(AssetSource('alert_sound.mp3'), volume: 1);
+        }
+      });
 
-          // Send error directly to UI through background service
-          if (payload.contains('camera')) {
-            print('camera');
-            service.invoke('updateErrors', {
-              'icon': 'camera',
-              'object': 'Camera has problems',
-              'content': payload
-            });
-          } else if (payload.contains('mount')) {
-            print('mount');
-            service.invoke('updateErrors', {
-              'icon': 'mouse',
-              'object': 'Mount has problems',
-              'content': payload
-            });
-          } else if (payload.contains('focuser')) {
-            print('focuser');
-            service.invoke('updateErrors', {
-              'icon': 'radar',
-              'object': 'Focuser has problems',
-              'content': payload
-            });
+      client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> message) {
+        final recMess = message[0].payload as MqttPublishMessage;
+        final payload =
+            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+
+        // Check tags using a loop
+        if (csvtags.isNotEmpty) {
+          if (csvtags.contains(',')) {
+            final tags = csvtags.split(',');
+            for (String tag in tags) {
+              if (tag.trim().isNotEmpty && payload.contains(tag.trim())) {
+                shouldPlaySound = true;
+              }
+            }
           } else {
-            print('unknown');
-            service.invoke('updateErrors', {
-              'icon': 'error_outline',
-              'object': 'Unknown error',
-              'content': payload
-            });
+            if (csvtags.trim().isNotEmpty && payload.contains(csvtags.trim())) {
+              shouldPlaySound = true;
+            }
           }
-        });
+        }
+
+        // Remove the old Timer and just play sound immediately
+        if (shouldPlaySound) {
+          audioPlayer.play(AssetSource('alert_sound.mp3'));
+        }
+
+        // Send error directly to UI through background service
+        if (payload.contains('camera')) {
+          print('camera');
+          service.invoke('updateErrors', {
+            'icon': 'camera',
+            'object': 'Camera has problems',
+            'content': payload
+          });
+        } else if (payload.contains('mount')) {
+          print('mount');
+          service.invoke('updateErrors', {
+            'icon': 'mouse',
+            'object': 'Mount has problems',
+            'content': payload
+          });
+        } else if (payload.contains('focuser')) {
+          print('focuser');
+          service.invoke('updateErrors', {
+            'icon': 'radar',
+            'object': 'Focuser has problems',
+            'content': payload
+          });
+        } else {
+          print('unknown');
+          service.invoke('updateErrors', {
+            'icon': 'error_outline',
+            'object': 'Unknown error',
+            'content': payload
+          });
+        }
       });
     });
   }
@@ -144,21 +176,19 @@ bool onBackgroundIos(ServiceInstance service) {
 }
 
 void onConnected() {
-  print("ipAddress: $ipAddress");
-  print(
-      'EXAMPLE::OnConnected client callback - Client connection was successful');
+  print("onConnected $ipAddress");
 }
 
 void onSubscribed(String topic) {
-  print('EXAMPLE::OnSubscribed callback with topic: $topic');
+  print('onSubscribed $topic');
 }
 
 void onDisconnected() {
-  print('EXAMPLE::OnDisconnected client callback - Client disconnected');
+  print('onDisconnected');
 }
 
 void onStopService() {
-  print('EXAMPLE::OnStopService client callback - Client stopped');
+  print('onStopService');
 }
 
 // La funzione playNotification non è necessaria qui

@@ -83,8 +83,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                   // Save configuration to SharedPreferences
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setString('ip_address', items[0].content);
-                  await prefs.setString('topic', items[1].content);
-                  await prefs.setString('tags', items[2].content);
+                  await prefs.setString('port', items[1].content);
+                  await prefs.setString('topic', items[2].content);
+                  await prefs.setString('tags', items[3].content);
 
                   // Restart service
                   service.invoke('stopService');
@@ -159,9 +160,43 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
             controller: tabView,
             children: [
               ListView.builder(
-                itemCount: errors.length,
+                itemCount: errors.length + 1,
                 itemBuilder: (context, index) {
-                  final item = errors[index];
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: errors.isEmpty
+                          ? const SizedBox.shrink()
+                          : ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red[900],
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12.0, horizontal: 16.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  errors.clear();
+                                  service.invoke('silence');
+                                });
+                              },
+                              icon: const Icon(Icons.delete_sweep,
+                                  color: Colors.white),
+                              label: const Text(
+                                'Clear All Alerts',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                    );
+                  }
+
+                  final item = errors[index - 1];
                   return Card(
                     margin: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16.0),
@@ -171,26 +206,42 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(18.0),
                       ),
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Icon(
-                            item.icona,
-                          ),
-                          Text(
-                            item.object,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0,
-                              fontFamily: 'Verdana',
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  item.icona,
+                                ),
+                                Text(
+                                  item.object,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18.0,
+                                    fontFamily: 'Verdana',
+                                  ),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(item.content,
+                                    style: const TextStyle(
+                                      fontSize: 15.0,
+                                      fontFamily: 'Verdana',
+                                    )),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 8.0),
-                          Text(item.content,
-                              style: const TextStyle(
-                                fontSize: 15.0,
-                                fontFamily: 'Verdana',
-                              )),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.delete, color: Colors.white70),
+                            onPressed: () {
+                              setState(() {
+                                service.invoke('silence');
+                                errors.removeAt(index - 1);
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ),
