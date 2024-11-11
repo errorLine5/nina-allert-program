@@ -97,7 +97,7 @@ void onStart(ServiceInstance service) async {
       // Create a periodic timer for sound
       Timer.periodic(const Duration(seconds: 3), (timer) {
         if (shouldPlaySound) {
-          audioPlayer.play(AssetSource('alert_sound.mp3'), volume: 1);
+          audioPlayer.play(AssetSource('alert_sound.mp3'), volume: 10);
         }
       });
 
