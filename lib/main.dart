@@ -76,7 +76,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins'),
       home: Scaffold(
+        backgroundColor: Color(0xFFF5F5F5),
         floatingActionButton: tabView.index == 1
             ? FloatingActionButton(
                 onPressed: () async {
@@ -117,11 +119,14 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 flexibleSpace: LayoutBuilder(
                   builder: (context, constraints) {
                     double height = constraints.maxHeight;
+                    double minHeight = 100;
+                    double adjustedHeight =
+                        height <= minHeight ? minHeight : height;
                     return FlexibleSpaceBar(
                       background: Container(
-                        height: height <= 30 ? 30 : height,
-                        child: Image.network(
-                          'https://static.vecteezy.com/ti/foto-gratuito/t2/37916193-ai-generato-latteo-modo-galassia-come-visto-a-partire-dal-terra-denso-cluster-di-stelle-e-celeste-polvere-la-creazione-di-un-incandescente-intricato-modello-contro-il-buio-cielo-concetto-di-astronomia-spazio-galassia-foto.jpeg',
+                        height: adjustedHeight,
+                        child: Image.asset(
+                          'assets/nebula.webp',
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -169,9 +174,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                           ? const SizedBox.shrink()
                           : ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red[900],
+                                backgroundColor: const Color(0xFF8D0F0F),
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 16.0),
+                                    vertical: 8.0, horizontal: 16.0),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18.0),
                                 ),
