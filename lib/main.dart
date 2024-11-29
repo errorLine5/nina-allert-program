@@ -1,20 +1,22 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'background.dart';
 
-// Global service instance for background tasks
+/// Global service instance for background tasks
 late FlutterBackgroundService service;
 
-// Initialize app and background service
+/// Initialize app and background service
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   service = await initializeService();
   runApp(const MyApp());
 }
 
+/// creates an instance of the _MyAppState state class,
+/// which handles dynamic data and user interface
+/// construction.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -22,15 +24,18 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-// Model class for configuration items (IP, Port, etc.)
+/// Model class for configuration items (IP, Port, etc.).
+/// The class allows you to create objects with a fixed title.
+(title) and editable content (content)
 class MyItem {
   final String title;
   String content; // Mutable to allow user edits
 
+  // Constructor to initialize MyItem with title and content
   MyItem(this.title, this.content);
 }
 
-// Model class for error/alert items
+/// Model class for error/alert items
 class Error {
   final IconData icona;
   final String object;
@@ -38,6 +43,7 @@ class Error {
   final DateTime timestamp;
   final Color color;
 
+  // Constructor to initialize Error object with relevant details
   Error(this.icona, this.object, this.content, this.timestamp, this.color);
 }
 
@@ -57,6 +63,9 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   ScrollController scrollView = ScrollController();
   late TabController tabView;
 
+  /// initialize the widget with a TabController to 
+  /// manage a tabbed view and set up a listener to
+  /// receive errors from the background service.
   @override
   void initState() {
     // Initialize tab controller with 2 tabs
@@ -82,6 +91,8 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     super.initState();
   }
 
+  /// Contains all the logic intended for the graphical
+  /// representation of the application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
