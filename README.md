@@ -63,7 +63,7 @@ graph LR
         Config
     end
 
-    style NINA fill:#f9f,stroke:#333,stroke-width:2px
+
 
 ## Data Flow
 People involved:
