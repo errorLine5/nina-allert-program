@@ -1,19 +1,22 @@
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
+/// The MqttService class manages the connection to an MQTT broker,
+/// the subscription to a topic and the reception of messages.
 class MqttService {
   late MqttServerClient client;
 
   Future<void> connect() async {
-    // Indica l'host del broker MQTT, ad esempio un IP o un dominio
+    // Indicates the MQTT broker host, such as an IP or domain.
     client = MqttServerClient('test.mosquitto.org', '');
 
-    // Configura il client
+    // Client configuration
     client.port = 1883; // Default MQTT port
     client.keepAlivePeriod = 20;
     client.logging(on: false);
 
-    // Gestisci i callback per la connessione, la disconnessione, e la ricezione dei messaggi
+    // Handle callbacks for connecting, disconnecting,
+    // and receiving messages
     client.onConnected = onConnected;
     client.onDisconnected = onDisconnected;
     client.onSubscribed = onSubscribed;
@@ -35,10 +38,10 @@ class MqttService {
     } catch (e) {
       print('Errore durante la connessione: $e');
       client.disconnect();
-      return; // Esci se la connessione fallisce
+      return; // Leave if the connection break down
     }
 
-    // Sottoscriviti a un topic solo se la connessione è stabilita
+    // Subscribe only if the connection is established
     if (client.connectionStatus!.state == MqttConnectionState.connected) {
       print('Sottoscrivendo al topic...');
       client.subscribe('invioCasuale', MqttQos.atLeastOnce);
@@ -47,13 +50,13 @@ class MqttService {
       return;
     }
 
-    // Verifica se client.updates è null
+    // Verifies if the client.updates is null
     if (client.updates == null) {
       print('client.updates è null, impossibile ricevere messaggi.');
       return;
     }
 
-    // Ricezione dei messaggi
+    // Message receiver
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       print('Ricevuto un aggiornamento: $c');
       if (c != null && c.isNotEmpty) {
