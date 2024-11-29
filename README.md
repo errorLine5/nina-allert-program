@@ -42,6 +42,22 @@ The app allows configuration of:
 4. Tags (comma-separated values for alert filtering)
 
 ## Data Flow
-
 ```mermaid
 graph LR
+    MQTT[MQTT Broker] -->|Messages| BG[Background Service]
+    BG -->|Process Messages| Filter[Message Filter]
+    Filter -->|Matched Tags| Alert[Alert System]
+    Alert -->|Update UI| UI[Main UI]
+    Alert -->|Trigger| Sound[Audio Alert]
+    
+    Config[Configuration] -->|Settings| BG
+    Config -->|Tag List| Filter
+    
+    subgraph App
+        BG
+        Filter
+        Alert
+        UI
+        Sound
+        Config
+    end
