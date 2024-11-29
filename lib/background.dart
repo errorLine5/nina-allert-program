@@ -15,8 +15,10 @@ String csvtags = '';
 // Flag to control audio alert playback
 bool shouldPlaySound = false;
 
-/// Initializes and configures the background service
-/// Returns the configured FlutterBackgroundService instance
+/// initializeService contains the definition of the behavior
+/// of the application at startup, as well as the definition of a
+/// FlutterBackgroundService object for managing a
+/// background service.
 Future<FlutterBackgroundService> initializeService() async {
   print('initializeService');
 
@@ -56,8 +58,9 @@ Future<FlutterBackgroundService> initializeService() async {
   return service;
 }
 
-/// Main background service function for Android
-/// Handles MQTT connection and message processing
+/// onStart takes care of managing the service logic in the background
+/// of the application (creation of a client, subscription to a topic and
+/// management of received messages).
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   if (service is AndroidServiceInstance) {
