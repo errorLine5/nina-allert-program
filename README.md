@@ -1,16 +1,47 @@
-# flutter_application_1
+# N.A.P. (Nina Alert Application)
 
-A new Flutter project.
+A Flutter application that monitors MQTT messages for specific alerts and displays them in a user interface. The app includes background service capabilities and audio notifications.
 
-## Getting Started
+## Key Features
 
-This project is a starting point for a Flutter application.
+- 🔔 MQTT message monitoring
+- 🔄 Background service support
+- ⚡ Real-time alerts display
+- 🔊 Audio notifications
+- ⚙️ Configurable settings
+- 📱 Cross-platform support (iOS and Android)
 
-A few resources to get you started if this is your first Flutter project:
+## Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Main Components
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#### 1. Main App (`lib/main.dart`)
+The main application consists of two primary views managed through a TabController:
+- Errors Tab: Displays alerts and notifications
+- Configuration Tab: Contains MQTT connection settings
+
+Key classes:
+- `MyApp`: Root widget
+- `MyItem`: Configuration item model
+- `Error`: Alert/error model
+- `_MyAppState`: Main app state management
+
+#### 2. Background Service (`lib/background.dart`)
+Handles MQTT connections and message processing in the background:
+- MQTT client initialization
+- Message subscription and processing
+- Audio alert management
+- Communication with main UI
+
+## Configuration Settings
+
+The app allows configuration of:
+1. IP Address (default: test.mosquitto.org)
+2. Port (default: 1883)
+3. Topic (default: test)
+4. Tags (comma-separated values for alert filtering)
+
+## Data Flow
+
+```mermaid
+graph LR

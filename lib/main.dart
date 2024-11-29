@@ -5,7 +5,10 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'background.dart';
 
+// Global service instance for background tasks
 late FlutterBackgroundService service;
+
+// Initialize app and background service
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   service = await initializeService();
@@ -19,13 +22,15 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+// Model class for configuration items (IP, Port, etc.)
 class MyItem {
   final String title;
-  String content; // Rendi il campo content modificabile
+  String content; // Mutable to allow user edits
 
   MyItem(this.title, this.content);
 }
 
+// Model class for error/alert items
 class Error {
   final IconData icona;
   final String object;
@@ -37,6 +42,7 @@ class Error {
 }
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  // Default configuration items
   final List<MyItem> items = [
     MyItem("IP address", "test.mosquitto.org"),
     MyItem("Port", "1883"),
@@ -44,13 +50,16 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     MyItem("Tags", ""),
   ];
 
+  // List to store error/alert messages
   final List<Error> errors = [];
 
+  // Controllers for scrolling and tabs
   ScrollController scrollView = ScrollController();
   late TabController tabView;
 
   @override
   void initState() {
+    // Initialize tab controller with 2 tabs
     tabView = TabController(length: 2, vsync: this);
 
     // Listen for errors from background service
@@ -60,8 +69,8 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       final errorData = event as Map<String, dynamic>;
       setState(() {
         print(errorData);
+        // Add new error to the list with appropriate icon and color
         errors.add(Error(
-            // You can customize the icon
             Icons.error_outline,
             errorData['object'] ?? 'unknown',
             errorData['content'] ?? 'unknown error',
@@ -79,17 +88,18 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins'),
       home: Scaffold(
         backgroundColor: Color(0xFFF5F5F5),
+        // Show save button only on configuration tab
         floatingActionButton: tabView.index == 1
             ? FloatingActionButton(
                 onPressed: () async {
-                  // Save configuration to SharedPreferences
+                  // Save all configuration items to persistent storage
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setString('ip_address', items[0].content);
                   await prefs.setString('port', items[1].content);
                   await prefs.setString('topic', items[2].content);
                   await prefs.setString('tags', items[3].content);
 
-                  // Restart service
+                  // Restart background service to apply new settings
                   service.invoke('stopService');
                   await Future.delayed(const Duration(seconds: 1));
                   service = await initializeService();
@@ -99,6 +109,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
               )
             : null,
         body: NestedScrollView(
+          // Custom scrollable app bar with background image
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
               SliverAppBar(
@@ -161,12 +172,15 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
               ),
             ];
           },
+          // Main content area with two tabs
           body: TabBarView(
             controller: tabView,
             children: [
+              // First tab: Error/Alert list
               ListView.builder(
                 itemCount: errors.length + 1,
                 itemBuilder: (context, index) {
+                  // First item is the clear all button (if errors exist)
                   if (index == 0) {
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -201,6 +215,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                     );
                   }
 
+                  // Display error cards
                   final item = errors[index - 1];
                   return Card(
                     margin: const EdgeInsets.symmetric(
@@ -253,6 +268,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                   );
                 },
               ),
+              // Second tab: Configuration items
               ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
