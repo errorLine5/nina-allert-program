@@ -62,19 +62,22 @@ graph LR
         Sound
         Config
     end
+```
 
+## Team
+- Filippo Gammaidoni
+- Elena Bezzi
+- Francesco Billa
+- Daniele Beltrami
+- Fabio Sterchevici
+- Pietro Tironzelli
+- Francesco Grelli
 
-
-## Data Flow
-People involved:
-Filippo Gammaidoni,Elena Bezzi, Francesco Billa, Daniele Beltrami, Fabio Sterchevici, Pietro Tironzelli, Francesco Grelli.
-
-Roles: 
-    - Francesco Grelli: Project management.
-    - Filippo, Elena, Francesco Billa: Design and implementation of the main app.
-    - Fabio, Pietro, Francesco Grelli: Design and implementation of the background service.
-    - Daniele Beltrami: Testing and debugging.
-
+### Roles
+- **Project Management**: Francesco Grelli
+- **Main App Design & Implementation**: Filippo, Elena, Francesco Billa
+- **Background Service Design & Implementation**: Fabio, Pietro, Francesco Grelli
+- **Testing & Debugging**: Daniele Beltrami
 
 ## Setup
 
