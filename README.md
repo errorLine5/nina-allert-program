@@ -44,7 +44,8 @@ The app allows configuration of:
 ## Data Flow
 ```mermaid
 graph LR
-    MQTT[MQTT Broker] -->|Messages| BG[Background Service]
+    NINA[NINA Service] -->|Events| MQTT[MQTT Broker]
+    MQTT -->|Messages| BG[Background Service]
     BG -->|Process Messages| Filter[Message Filter]
     Filter -->|Matched Tags| Alert[Alert System]
     Alert -->|Update UI| UI[Main UI]
@@ -61,3 +62,5 @@ graph LR
         Sound
         Config
     end
+
+    style NINA fill:#f9f,stroke:#333,stroke-width:2px
